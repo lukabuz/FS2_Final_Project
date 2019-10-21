@@ -70,7 +70,12 @@ api.post("/login", async (req: any, res: any) => {
 	const userHash = await dataInterface.getUserHash(req.body.username);
 
 	if (userHash === hash(req.body.password)) {
-		res.json({ status: "success" });
+		const userInfo = await dataInterface.getUserInfo(req.body.username);
+		res.json({
+			status: "success",
+			username: req.body.username,
+			data: userInfo
+		});
 		return;
 	} else {
 		res.json({ status: "error", errors: ["Wrong password."] });
