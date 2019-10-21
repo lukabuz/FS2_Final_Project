@@ -10,19 +10,20 @@ import {
 	Button
 } from "bloomer";
 
-export default class Login extends Component {
+export default class Register extends Component {
 	state = {
 		username: "",
-		password: ""
+		password: "",
+		email: ""
 	};
 	handleChange = e => {
 		this.setState({
 			[e.target.name]: e.target.value
 		});
 	};
-	login = async () => {
+	register = async () => {
 		this.props.authInterface
-			.login(this.state.username, this.state.password)
+			.register(this.state.username, this.state.email, this.state.password)
 			.then(res => {
 				alert(res);
 			})
@@ -34,7 +35,7 @@ export default class Login extends Component {
 		return (
 			<Column isSize="1/3" isOffset={4}>
 				<Box>
-					<Title> Log In </Title>
+					<Title> Register </Title>
 					<hr />
 					<Field>
 						<Label>Username</Label>
@@ -45,6 +46,18 @@ export default class Login extends Component {
 								name="username"
 								onChange={this.handleChange}
 								value={this.state.username}
+							/>
+						</Control>
+					</Field>
+					<Field>
+						<Label>Email</Label>
+						<Control>
+							<Input
+								type="text"
+								placeholder="Email"
+								name="email"
+								onChange={this.handleChange}
+								value={this.state.email}
 							/>
 						</Control>
 					</Field>
@@ -62,8 +75,8 @@ export default class Login extends Component {
 					</Field>
 					<Field>
 						<Control>
-							<Button onClick={this.login} isColor="primary">
-								Log In
+							<Button onClick={this.register} isColor="primary">
+								Register
 							</Button>
 						</Control>
 					</Field>
