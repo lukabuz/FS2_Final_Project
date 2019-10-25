@@ -6,6 +6,7 @@ import * as hash from "object-hash";
 import { Validator } from "./validator";
 import * as admin from "firebase-admin";
 import Database from "./database";
+import { resolve } from "url";
 
 admin.initializeApp();
 const db: any = admin.database();
@@ -21,12 +22,65 @@ const isJsonString = (str: any): boolean => {
 	return true;
 };
 
+const authenticate = (username: string, password: string) => {
+	return new Promise(async (resolve: any, reject: any) => {
+		const userExists = await dataInterface.checkIfUserExists(username);
+
+		if (!userExists) {
+			reject(false);
+			return;
+		}
+
+		const userHash = await dataInterface.getUserHash(username);
+
+		if (userHash === hash(password)) {
+			resolve(true);
+		} else {
+			reject(false);
+		}
+	});
+};
+
 // middleware for parsing req.body
 const parsingMiddleware = (req: any, res: any, next: any) => {
 	if (isJsonString(req.body)) {
 		req.body = JSON.parse(req.body);
 	}
 	next();
+};
+
+const authenticationMiddleware = async (req: any, res: any, next: any) => {
+	const validator = new Validator(
+		[
+			{
+				variableName: "username",
+				displayName: "username",
+				minLength: 1,
+				maxLength: 50
+			},
+			{
+				variableName: "password",
+				displayName: "password",
+				minLength: 6,
+				maxLength: 1000
+			}
+		],
+		req.body
+	);
+
+	if (!validator.validate()) {
+		res.json({ status: "error", errors: validator.errors });
+		return;
+	}
+
+	const authenticated = authenticate(req.body.username, req.body.password);
+
+	if (authenticated) {
+		next();
+	} else {
+		res.json({ status: "error", errors: ["Unable to authenticate."] });
+		return;
+	}
 };
 
 // initialize express, set cors, and handle body parsing
@@ -60,25 +114,13 @@ api.post("/login", async (req: any, res: any) => {
 		return;
 	}
 
-	const userExists = await dataInterface.checkIfUserExists(req.body.username);
+	const authenticated = authenticate(req.body.username, req.body.password);
+	const data = await dataInterface.getUserInfo(req.body.username);
 
-	if (!userExists) {
-		res.json({ status: "error", errors: ["User does not exist."] });
-		return;
-	}
-
-	const userHash = await dataInterface.getUserHash(req.body.username);
-
-	if (userHash === hash(req.body.password)) {
-		const userInfo = await dataInterface.getUserInfo(req.body.username);
-		res.json({
-			status: "success",
-			username: req.body.username,
-			data: userInfo
-		});
-		return;
+	if (authenticated) {
+		res.json({ status: "success", username: req.body.username, data: data });
 	} else {
-		res.json({ status: "error", errors: ["Wrong password."] });
+		res.json({ status: "error", errors: ["Unable to authenticate."] });
 		return;
 	}
 });
