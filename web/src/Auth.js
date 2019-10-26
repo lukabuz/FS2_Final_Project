@@ -1,22 +1,27 @@
 export default class Auth {
-	constructor(updateCallback) {
+	constructor() {
 		this.authenticated = false;
-		this.updateCallback = updateCallback;
 		return this.authenticated;
 	}
 
-	async initialize() {
+	async initialize(updateCallback) {
+		this.updateCallback = updateCallback;
 		return new Promise(async resolve => {
 			let username = localStorage.getItem("username");
 			let password = localStorage.getItem("password");
 			if (!username || !password) {
-				return false;
+				resolve(false);
+			} else {
+				this.authenticated = await this.login(username, password);
+				this.updateCallback();
+				resolve(this.authenticated);
 			}
-			this.authenticated = await this.login(username, password);
-			this.updateCallback();
-			resolve(this.authenticated);
 		});
 	}
+
+	getAuthDetails = () => {
+		return { username: this.username, password: this.password };
+	};
 
 	register(username, email, password) {
 		return new Promise(async (resolve, reject) => {
@@ -36,6 +41,8 @@ export default class Auth {
 			);
 			const json = await response.json();
 			if (json.status === "success") {
+				this.username = username;
+				this.password = password;
 				resolve(true);
 			} else {
 				this.errors = json.errors;
@@ -59,7 +66,8 @@ export default class Auth {
 			const json = await response.json();
 			if (json.status === "success") {
 				this.authenticated = true;
-				this.userData = json.data;
+				this.username = username;
+				this.password = password;
 				localStorage.setItem("username", username);
 				localStorage.setItem("password", password);
 				this.updateCallback();
