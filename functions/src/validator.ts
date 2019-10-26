@@ -42,20 +42,34 @@ export class Validator {
 	// check lengths of all variables
 	private checkLength(): boolean {
 		for (const config of this.configs) {
-			if (this.body[config.variableName].length > config.maxLength) {
+			if (
+				!isNaN(this.body[config.variableName]) &&
+				+this.body[config.variableName] > config.maxLength
+			) {
+				this.errors.push(
+					config.displayName + " must be a maximum of " + config.maxLength
+				);
+			} else if (this.body[config.variableName].length > config.maxLength) {
 				// check for max
 				this.errors.push(
 					config.displayName +
-						" must be a minimum of " +
+						" must be a maximum of " +
 						config.maxLength +
 						" letters"
 				);
 			}
-			if (this.body[config.variableName].length < config.minLength) {
+			if (
+				!isNaN(this.body[config.variableName]) &&
+				+this.body[config.variableName] < config.minLength
+			) {
+				this.errors.push(
+					config.displayName + " must be a minimum of " + config.minLength
+				);
+			} else if (this.body[config.variableName].length < config.minLength) {
 				// check for min
 				this.errors.push(
 					config.displayName +
-						" must be a maximum of " +
+						" must be a minimum of " +
 						config.minLength +
 						" letters"
 				);

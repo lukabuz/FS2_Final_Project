@@ -31,7 +31,12 @@ export default class Database {
 				.child("item_listings")
 				.child(listing)
 				.once("value", function(snapshot: any) {
-					resolve(snapshot.val() !== null);
+					const val = snapshot.val();
+					if (val !== null) {
+						resolve(val.buyer.length === 0);
+					} else {
+						resolve(false);
+					}
 				});
 		});
 	}
@@ -95,27 +100,24 @@ export default class Database {
 	// optional parameter listingId can be provided if the transaction is payment for a listing
 	// resolves to a string or rejects with an error
 	createTransaction(from: string, to: string, amount: number, listingId = "") {
-		return new Promise(async (resolve: any, reject: any) => {
-			if (from === "ADMIN") {
-				// do not check anything other than recipient if transaction is from an admin
-				const toExists = this.checkIfUserExists(to);
-				if (toExists) {
-					reject("Error, recipient not found.");
-				}
-			} else {
-				// validate if both users exist
-				const fromExists = this.checkIfUserExists(from);
-				const toExists = this.checkIfUserExists(to);
-				// check if sender has enough money
-				const balance = await this.getUserBalance(from);
-				if (!fromExists) {
-					reject("Error, sender does not exist.");
-				} else if (!toExists) {
-					reject("Error, recipient does not exist.");
-				} else if (balance < amount) {
+		return new Promise<any>(async (resolve: any, reject: any) => {
+			const fromExists = await this.checkIfUserExists(from);
+			const toExists = await this.checkIfUserExists(to);
+			const balance = await this.getUserBalance(from);
+			if (!fromExists) {
+				reject("Error, sender does not exist.");
+			} else if (!toExists) {
+				reject("Error, recipient does not exist.");
+			} else if (balance < amount) {
+				if (from !== "ADMIN") {
 					reject("Error, not enough funds.");
 				}
+			} else if (amount === 0) {
+				reject("Error, can't send empty transaction.");
+			} else if (from === to) {
+				reject("Error, can't send money to yourself.");
 			}
+
 			// generate an unique id for transaction
 			const id = hash(from + Date.now().toString() + to);
 			const transaction: any = {
@@ -133,6 +135,7 @@ export default class Database {
 				.child("transactions")
 				.child(id)
 				.set(transaction);
+
 			resolve(id);
 		});
 	}
@@ -141,16 +144,18 @@ export default class Database {
 	// if sent is true(default), the function returns transactions sent by user
 	// if sent is false, the function returns transactions recieved by user
 	// resolves to an object and rejects with an error string
-	getUserTransactions(username: string, sent: boolean = true) {
+	getUserTransactions(username: string, sent: boolean) {
 		return new Promise(async (resolve: any, reject: any) => {
 			// validate if user exists
-			if (!this.checkIfUserExists(username)) {
+			const userExists = await this.checkIfUserExists(username);
+			if (!userExists) {
 				reject("User does not exist.");
 				return;
 			}
+			const key = sent ? "from" : "to";
 			this.ref
 				.child("transactions")
-				.orderByChild(sent ? "from" : "to")
+				.orderByChild(key)
 				.equalTo(username)
 				.on("value", function(snapshot: any) {
 					resolve(snapshot.val());
@@ -162,14 +167,19 @@ export default class Database {
 	// resolves to a number or rejects with an error string
 	getUserBalance(username: string) {
 		return new Promise<any>(async (resolve: any, reject: any) => {
-			if (!this.checkIfUserExists(username)) {
+			if (username === "ADMIN") {
+				resolve(-1);
+			}
+
+			const userExists = await this.checkIfUserExists(username);
+			if (!userExists) {
 				reject("User does not exist.");
 				return;
 			}
 
 			let balance = 0;
 			// get a list of sent transactions and decrement balance by their values
-			const sent: any = await this.getUserTransactions(username);
+			const sent: any = await this.getUserTransactions(username, true);
 			for (const key in sent) {
 				if (!sent.hasOwnProperty(key)) continue;
 				balance -= sent[key].amount;
@@ -181,7 +191,41 @@ export default class Database {
 				if (!received.hasOwnProperty(key)) continue;
 				balance += received[key].amount;
 			}
+
 			resolve(balance);
+		});
+	}
+
+	getUserPurchases(username: string) {
+		return new Promise((resolve: any, reject: any) => {
+			this.ref
+				.child("private")
+				.child("users")
+				.child(username)
+				.child("owned")
+				.on("value", function(snapshot: any) {
+					const purchases = snapshot.val();
+					if (purchases === null) {
+						resolve({});
+					}
+					resolve(purchases);
+				});
+		});
+	}
+
+	getUserListings(username: string) {
+		return new Promise((resolve: any, reject: any) => {
+			this.ref
+				.child("item_listings")
+				.orderByChild("seller")
+				.equalTo(username)
+				.on("value", function(snapshot: any) {
+					const listings = snapshot.val();
+					if (listings === null) {
+						resolve({});
+					}
+					resolve(listings);
+				});
 		});
 	}
 
@@ -189,9 +233,8 @@ export default class Database {
 	// administrator has an infinite balance
 	giveUserMoney(username: string, amount: number) {
 		return new Promise<any>(async (resolve: any, reject: any) => {
-			if (!this.checkIfUserExists(username)) {
-				reject("User does not exist");
-			} else {
+			const userExists = await this.checkIfUserExists(username);
+			if (userExists) {
 				this.createTransaction("ADMIN", username, amount)
 					.then(res => {
 						resolve(res);
@@ -199,12 +242,14 @@ export default class Database {
 					.catch(e => {
 						reject(e);
 					});
+			} else {
+				reject("User does not exist");
 			}
 		});
 	}
 
 	// create a listing for a digital item
-	// resolves to a boolean or rejects with an error string
+	// resolves to a string or rejects with an error string
 	createListing(
 		seller: string,
 		itemName: string,
@@ -213,7 +258,8 @@ export default class Database {
 		itemDescription: string
 	) {
 		return new Promise<any>(async (resolve: any, reject: any) => {
-			if (!this.checkIfUserExists(seller)) {
+			const userExists = await this.checkIfUserExists(seller);
+			if (!userExists) {
 				reject("User does not exist");
 				return;
 			}
@@ -239,7 +285,7 @@ export default class Database {
 				.set({
 					itemPayload: itemPayload
 				});
-			resolve(true);
+			resolve(id);
 		});
 	}
 
@@ -283,33 +329,24 @@ export default class Database {
 	// purchase a specific item
 	// resolves to a string or rejects with an error string
 	buyItem(buyer: string, listing: string) {
-		return new Promise(async (resolve: any, reject: any) => {
-			const errors: string[] = [];
-			// validate existence of both user and listing
-			const userExists = await this.checkIfUserExists(buyer);
+		return new Promise<any>(async (resolve: any, reject: any) => {
+			// validate existence of listing
 			const listingExists = await this.checkIfListingExists(listing);
-			let userBalance: any;
-			let listingObject: any;
-			if (!userExists) {
-				errors.push("User does not exist");
-			} else if (!listingExists) {
-				errors.push("Listing does not exist");
+			const listingObject = await this.getListing(listing);
+			if (!listingExists) {
+				reject("Listing does not exist");
 			}
-
-			if (errors.length === 0) {
-				// if both exist, check balance of user
-				userBalance = this.getUserBalance(buyer);
-				listingObject = await this.getListing(listing);
-				if (userBalance < listingObject.itemPrice) {
-					errors.push("Not enough funds.");
-				}
-				// check if someone is buying their own item
-				if (buyer === listingObject.sellerName) {
-					errors.push("You can not buy your own item.");
-				}
+			const userBalance = await this.getUserBalance(buyer);
+			// if both exist, check balance of user
+			if (buyer === listingObject.seller) {
+				reject("Error, can't send money to yourself.");
 			}
-			if (errors.length !== 0) {
-				reject(errors);
+			if (userBalance < listingObject.itemPrice) {
+				reject("Not enough funds.");
+			}
+			// check if someone is buying their own item
+			if (buyer === listingObject.seller) {
+				reject("You can not buy your own item.");
 			}
 
 			// send money
@@ -341,7 +378,7 @@ export default class Database {
 				.child(listingObject.id)
 				.update({ buyer: buyer });
 
-			resolve("Successfully bought item");
+			resolve({ listing: listingObject, payload: itemPayload });
 		});
 	}
 }
