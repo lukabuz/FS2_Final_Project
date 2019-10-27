@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Table, Button, Box, Columns, Column } from "bloomer";
+import { Table, Button, Box, Tile } from "bloomer";
 
 const pageSize = 5;
 
@@ -35,7 +35,11 @@ export default class Transactions extends Component {
 				<td>{val.to}</td>
 				<td>{this.unixToDateTime(val.date)}</td>
 				<td>{val.amount}</td>
-				<td>{val.from}</td>
+				{val.from === "ADMIN" ? (
+					<td style={{ color: "green", fontWeight: "bold" }}>Deposit</td>
+				) : (
+					<td>{val.from}</td>
+				)}
 			</tr>
 		));
 		return table;
@@ -48,10 +52,6 @@ export default class Transactions extends Component {
 			page,
 			this.state.pageSize
 		);
-		console.log(paginatedTransactions);
-		console.log(this.state.allTransactions);
-		console.log(page);
-		console.log(this.state.pageSize);
 		this.setState({
 			...this.state,
 			transactions: paginatedTransactions,
@@ -72,33 +72,65 @@ export default class Transactions extends Component {
 	render() {
 		return (
 			<Box>
-				<Table isBordered={true} isStriped={true} isFullWidth={true}>
-					<thead>
-						<tr>
-							<th>#</th>
-							<th>To</th>
-							<th>Date</th>
-							<th>Amount</th>
-							<th>From</th>
-						</tr>
-					</thead>
-					<tbody>{this.table()}</tbody>
-				</Table>
-				<Columns>
-					<Column hasTextAlign={"center"} isSize={"1/3"}>
-						<Button onClick={this.lastPage} isColor="primary">
-							Last
-						</Button>
-					</Column>
-					<Column hasTextAlign={"center"} isSize={"1/3"}>
-						{this.state.page + " / " + this.state.pages}
-					</Column>
-					<Column hasTextAlign={"center"} isSize={"1/3"}>
-						<Button onClick={this.nextPage} isColor="primary">
-							Next
-						</Button>
-					</Column>
-				</Columns>
+				<Tile isVertical={true}>
+					<Tile>
+						<div style={{ overflow: "auto" }}>
+							<Table isBordered={true} isStriped={true} isFullWidth={true}>
+								<thead>
+									<tr>
+										<th>#</th>
+										<th>To</th>
+										<th>Date</th>
+										<th>Amount</th>
+										<th>From</th>
+									</tr>
+								</thead>
+								<tbody>{this.table()}</tbody>
+							</Table>
+						</div>
+					</Tile>
+					<hr />
+					<Tile>
+						<Tile hasTextAlign={"left"} isSize={"4"}></Tile>
+						<Tile hasTextAlign={"center"} isSize={"4"}>
+							<Tile
+								style={{
+									alignItems: "center",
+									justifyContent: "center",
+									display: "flex"
+								}}
+								isSize={"4"}
+							>
+								<Button onClick={this.lastPage} isColor="primary">
+									Last
+								</Button>
+							</Tile>
+							<Tile
+								style={{
+									alignItems: "center",
+									justifyContent: "center",
+									display: "flex"
+								}}
+								isSize={"4"}
+							>
+								<span>{this.state.page + " / " + this.state.pages}</span>
+							</Tile>
+							<Tile
+								style={{
+									alignItems: "center",
+									justifyContent: "center",
+									display: "flex"
+								}}
+								isSize={"4"}
+							>
+								<Button onClick={this.nextPage} isColor="primary">
+									Next
+								</Button>
+							</Tile>
+						</Tile>
+						<Tile hasTextAlign={"center"} isSize={"4"}></Tile>
+					</Tile>
+				</Tile>
 			</Box>
 		);
 	}

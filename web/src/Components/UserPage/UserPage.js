@@ -8,12 +8,12 @@ import {
 	Media,
 	MediaLeft,
 	Image,
-	Content,
 	MediaContent,
 	Title,
 	Subtitle
 } from "bloomer";
 import Transactions from "../Transactions/Transactions";
+import Listings from "../Listings/Listings";
 
 import DataInterface from "../../Data";
 
@@ -63,7 +63,7 @@ export default class UserPage extends Component {
 			return (
 				<Columns>
 					<Column isSize="1/3">
-						<Box>
+						<div>
 							<Card>
 								<CardContent>
 									<Media>
@@ -85,17 +85,22 @@ export default class UserPage extends Component {
 									</Media>
 								</CardContent>
 							</Card>
-							<Transactions
-								width="100%"
-								transactions={this.state.transactions.received}
-							/>
-							<Transactions
-								width="100%"
-								transactions={this.state.transactions.sent}
-							/>
-						</Box>
+						</div>
+						<hr />
+						<Title>Received Transactions</Title>
+						<Transactions
+							width="100%"
+							transactions={this.state.transactions.received}
+						/>
+						<Title>Sent Transactions</Title>
+						<Transactions
+							width="100%"
+							transactions={this.state.transactions.sent}
+						/>
 					</Column>
-					<Column isSize="1/3">2</Column>
+					<Column isSize="1/3">
+						<Listings listings={this.state.listings} />
+					</Column>
 					<Column isSize="1/3">3</Column>
 				</Columns>
 			);
