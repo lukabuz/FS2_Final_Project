@@ -251,8 +251,12 @@ Create a listing to sell a digital item.
 
 Author: [Lukabuz](https://github.com/lukabuz)
 
-Language - [Typescript](https://www.typescriptlang.org/)
-Database API - [Firebase Realtime Database](https://firebase.google.com/docs/database)
-Serverless Functions API - [Firebase Cloud Functions](https://firebase.google.com/docs/functions)
-NodeJS HTTP Framework - [ExpressJS](https://expressjs.com/)
-Documentation Built with [Postman](https://expressjs.com/) and [Postdown](https://github.com/TitorX/Postdown).
+- Language - [Typescript](https://www.typescriptlang.org/)
+
+- Database API - [Firebase Realtime Database](https://firebase.google.com/docs/database)
+
+- Serverless Functions API - [Firebase Cloud Functions](https://firebase.google.com/docs/functions)
+
+- NodeJS HTTP Framework - [ExpressJS](https://expressjs.com/)
+
+- Documentation Built with [Postman](https://expressjs.com/) and [Postdown](https://github.com/TitorX/Postdown)
