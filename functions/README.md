@@ -65,42 +65,13 @@ Log in, returns success if username and password combo are registered.
 
 ----------------
 
-## Get purchases and listings
+## Get user info
 
 ```
-POST https://us-central1-fscoin-f7656.cloudfunctions.net/api/myPurchases
+POST https://us-central1-fscoin-f7656.cloudfunctions.net/api/myInfo
 ```
 
-Get a list of purchases and a list of listings.
-
-----------------
-
-### Request
-
-> 
-> **Header**
-> 
-> |Key|Value|Description|
-> |---|---|---|
-> |Content-Type|application/x-www-form-urlencoded||
-> 
-> **Body**
-> 
-> |Key|Value|Type|Description|
-> |---|---|---|---|
-> |username|luka|text|username , min: 1 , max: 50|
-> |password|testpassword|text|password , min: 6 , max: 1000|
-> 
-
-----------------
-
-## Get transactions
-
-```
-POST https://us-central1-fscoin-f7656.cloudfunctions.net/api/myTransactions
-```
-
-Get a list of sent and recieved transactions.
+Get a list of sent and recieved transactions, balance, listings, purchases, and user account info.
 
 ----------------
 

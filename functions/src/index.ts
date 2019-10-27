@@ -359,53 +359,36 @@ api.post("/buyItem", authenticationMiddleware, async (req: any, res: any) => {
 	return;
 });
 
-api.post(
-	"/myTransactions",
-	authenticationMiddleware,
-	async (req: any, res: any) => {
-		const sent = await dataInterface.getUserTransactions(
-			req.body.username,
-			true
-		);
-		const received = await dataInterface.getUserTransactions(
-			req.body.username,
-			false
-		);
+api.post("/myInfo", authenticationMiddleware, async (req: any, res: any) => {
+	const sent = await dataInterface.getUserTransactions(req.body.username, true);
+	const received = await dataInterface.getUserTransactions(
+		req.body.username,
+		false
+	);
 
+	try {
 		const balance = await dataInterface.getUserBalance(req.body.username);
-
-		res.json({
-			status: "success",
-			balance: balance,
-			sent: sent,
-			received: received
-		});
-	}
-);
-
-api.post(
-	"/myPurchases",
-	authenticationMiddleware,
-	async (req: any, res: any) => {
+		const userInfo = await dataInterface.getUserInfo(req.body.username);
+		const userOwned = await dataInterface.getUserOwned(req.body.username);
 		const purchases = await dataInterface.getUserPurchases(req.body.username);
 		const listings = await dataInterface.getUserListings(req.body.username);
 
 		res.json({
 			status: "success",
+			balance: balance,
+			sent: sent,
+			received: received,
+			userInfo: userInfo,
+			userOwned: userOwned,
 			purchases: purchases,
 			listings: listings
 		});
+	} catch (e) {
+		res.json({
+			status: "error",
+			errors: ["Unknown error occured, please try again"]
+		});
 	}
-);
-
-// TODO
-
-// DONE
-// buy listing
-// send transaction
-// send admin transaction
-// create listing
-// get user transaction data
-// get user purchase data
+});
 
 exports.api = functions.https.onRequest(api);

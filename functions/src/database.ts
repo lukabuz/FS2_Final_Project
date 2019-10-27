@@ -96,6 +96,22 @@ export default class Database {
 		});
 	}
 
+	getUserOwned(username: string) {
+		return new Promise((resolve: any, reject: any) => {
+			this.ref
+				.child("private")
+				.child("users")
+				.child(username)
+				.on("value", function(snapshot: any) {
+					const privateInfo = snapshot.val();
+					if (privateInfo === null) {
+						reject("User does not exist.");
+					}
+					resolve(privateInfo.owned);
+				});
+		});
+	}
+
 	// create a transaction
 	// optional parameter listingId can be provided if the transaction is payment for a listing
 	// resolves to a string or rejects with an error
