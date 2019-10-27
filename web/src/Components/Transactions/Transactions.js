@@ -1,21 +1,21 @@
 import React, { Component } from "react";
 import { Table, Button, Box, Columns, Column } from "bloomer";
 
-export default class Transactions extends Component {
-	state = { transactions: [], page: 1, pageSize: 5, pages: 0 };
+const pageSize = 5;
 
-	componentWillReceiveProps({ transactions }) {
-		const paginatedTransactions = this.paginate(
-			transactions,
-			this.state.page,
-			this.state.pageSize
-		);
-		this.setState({
-			...this.state,
-			allTransactions: transactions,
+export default class Transactions extends Component {
+	constructor(props) {
+		super(props);
+		const transactions = props.transactions;
+		const pages = Math.ceil(transactions.length / pageSize);
+		const paginatedTransactions = this.paginate(transactions, 1, pageSize);
+		this.state = {
 			transactions: paginatedTransactions,
-			pages: Math.ceil(transactions.length / this.state.pageSize)
-		});
+			page: 1,
+			pageSize: pageSize,
+			pages: pages,
+			allTransactions: transactions
+		};
 	}
 
 	paginate(array, pageNumber, pageSize) {
@@ -48,6 +48,10 @@ export default class Transactions extends Component {
 			page,
 			this.state.pageSize
 		);
+		console.log(paginatedTransactions);
+		console.log(this.state.allTransactions);
+		console.log(page);
+		console.log(this.state.pageSize);
 		this.setState({
 			...this.state,
 			transactions: paginatedTransactions,
@@ -56,11 +60,13 @@ export default class Transactions extends Component {
 	};
 
 	nextPage = () => {
-		this.newPage(++this.state.page);
+		let newPage = this.state.page + 1;
+		this.newPage(newPage);
 	};
 
 	lastPage = () => {
-		this.newPage(--this.state.page);
+		let newPage = this.state.page - 1;
+		this.newPage(newPage);
 	};
 
 	render() {
