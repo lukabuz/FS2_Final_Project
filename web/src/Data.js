@@ -20,8 +20,6 @@ export default class DataInterface {
 			});
 			const json = await response.json();
 			if (json.status === "success") {
-				json.sent = this.dictToArray(json.sent);
-				json.received = this.dictToArray(json.received);
 				resolve(json);
 			} else {
 				reject(response.errors);
@@ -29,11 +27,16 @@ export default class DataInterface {
 		});
 	};
 
-	getTransactions = () => {
+	getInfo = () => {
 		return new Promise(async (resolve, reject) => {
-			this.apiRequest("myTransactions", {}, true)
-				.then(res => {
-					resolve(res);
+			this.apiRequest("myInfo", {}, true)
+				.then(json => {
+					json.sent = this.dictToArray(json.sent);
+					json.received = this.dictToArray(json.received);
+					json.received = this.dictToArray(json.received);
+					json.purchases = this.dictToArray(json.purchases);
+					json.listings = this.dictToArray(json.listings);
+					resolve(json);
 				})
 				.catch(e => {
 					reject(e);

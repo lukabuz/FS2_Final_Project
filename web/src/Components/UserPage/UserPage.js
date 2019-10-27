@@ -28,14 +28,23 @@ export default class UserPage extends Component {
 			this.props.authInterface.getAuthDetails().password
 		);
 
-		const transactions = await this.getTransactions();
-		this.setState(state => ({ ...state, transactions, loaded: true }));
+		const userInfo = await this.getInfo();
+
+		this.setState(state => ({
+			...state,
+			transactions: { sent: userInfo.sent, received: userInfo.received },
+			purchases: userInfo.purchases,
+			listings: userInfo.listings,
+			balance: userInfo.balance,
+			userInfo: userInfo.userInfo,
+			loaded: true
+		}));
 	};
 
-	getTransactions = async () => {
+	getInfo = async () => {
 		return new Promise((resolve, reject) => {
 			this.dataInterface
-				.getTransactions()
+				.getInfo()
 				.then(res => {
 					resolve(res);
 				})
@@ -65,13 +74,15 @@ export default class UserPage extends Component {
 											/>
 										</MediaLeft>
 										<MediaContent>
-											<Title isSize={4}>Username</Title>
-											<Subtitle isSize={6}>
-												Balance: {this.state.transactions.balance}
+											<Title isSize={7}>{this.state.userInfo.username}</Title>
+											<Subtitle isSize={5}>
+												{this.state.userInfo.email}
+											</Subtitle>
+											<Subtitle isSize={10}>
+												<strong>Balance: {this.state.balance}</strong>
 											</Subtitle>
 										</MediaContent>
 									</Media>
-									<Content>Test Content</Content>
 								</CardContent>
 							</Card>
 							<Transactions
