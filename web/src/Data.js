@@ -19,6 +19,7 @@ export default class DataInterface {
 				body: JSON.stringify(configs)
 			});
 			const json = await response.json();
+			console.log(json);
 			if (json.status === "success") {
 				resolve(json);
 			} else {
@@ -48,7 +49,7 @@ export default class DataInterface {
 		return new Promise(async (resolve, reject) => {
 			this.apiRequest("send", { recipient: recipient, amount: amount }, true)
 				.then(json => {
-					resolve(json);
+					resolve(json.message);
 				})
 				.catch(e => {
 					reject(e);
@@ -60,17 +61,74 @@ export default class DataInterface {
 		return new Promise(async (resolve, reject) => {
 			this.apiRequest(
 				"sendAsAdmin",
-				{ amount: amount, adminPassword: "adminpass" },
-				true
+				{ amount: amount, adminpass: "adminpass", recipient: this.username },
+				false
 			)
 				.then(json => {
-					resolve(json);
+					resolve(json.message);
 				})
 				.catch(e => {
 					reject(e);
 				});
 		});
 	};
+
+	purchaseListing = listingId => {
+		return new Promise((resolve, reject) => {
+			this.apiRequest("buyItem", { listing: listingId }, true)
+				.then(json => {
+					resolve(json.data.listing.id + " successfully purchased");
+				})
+				.catch(e => {
+					reject(e);
+				});
+		});
+	};
+
+	createListing = (name, description, payload, price) => {
+		return new Promise((resolve, reject) => {
+			this.apiRequest(
+				"createListing",
+				{
+					name: name,
+					description: description,
+					payload: payload,
+					price: price
+				},
+				true
+			)
+				.then(json => {
+					resolve(json.message);
+				})
+				.catch(e => {
+					reject(e);
+				});
+		});
+	};
+
+	getAllListings = () => {
+		return new Promise((resolve, reject) => {
+			fetch("https://fscoin-f7656.firebaseio.com/item_listings.json")
+				.then(response => response.json())
+				.then(jsonData => {
+					jsonData = this.dictToArray(jsonData).sort(this.orderListings);
+					resolve(jsonData);
+				})
+				.catch(error => {
+					reject(error);
+				});
+		});
+	};
+
+	orderListings(a, b) {
+		if (a.listingDate < b.listingDate) {
+			return 1;
+		}
+		if (a.listingDate > b.listingDate) {
+			return -1;
+		}
+		return 0;
+	}
 
 	dictToArray = dict => {
 		let array = [];

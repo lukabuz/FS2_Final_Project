@@ -10,11 +10,13 @@ export default class Auth {
 			let username = localStorage.getItem("username");
 			let password = localStorage.getItem("password");
 			if (!username || !password) {
+				this.authenticated = false;
 				resolve(false);
 			} else {
-				this.authenticated = await this.login(username, password);
+				let auth = await this.login(username, password);
+				this.authenticated = auth;
 				this.updateCallback();
-				resolve(this.authenticated);
+				resolve(auth);
 			}
 		});
 	}

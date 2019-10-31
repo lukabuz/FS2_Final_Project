@@ -95,6 +95,7 @@ export default class UserPage extends Component {
 	};
 
 	deposit = async () => {
+		console.log(this.state.depositAmount);
 		this.dataInterface
 			.depositMoney(this.state.depositAmount)
 			.then(res => {
@@ -104,8 +105,6 @@ export default class UserPage extends Component {
 				e.map(val => alert(val));
 			});
 	};
-
-	deposit = () => {};
 
 	render() {
 		if (this.state.loaded) {

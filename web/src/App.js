@@ -15,6 +15,7 @@ import Auth from "./Auth.js";
 import Login from "./Components/Login/Login";
 import Register from "./Components/Register/Register";
 import UserPage from "./Components/UserPage/UserPage";
+import ListingsPage from "./Components/ListingsPage/ListingsPage";
 
 export class App extends Component {
 	state = { isActive: false, loading: true };
@@ -103,6 +104,13 @@ export class App extends Component {
 										</Link>
 									</Button>
 								</NavbarItem>
+								<NavbarItem>
+									<Button isColor="link">
+										<Link to="/listings" style={{ color: "black" }}>
+											Listings
+										</Link>
+									</Button>
+								</NavbarItem>
 							</NavbarStart>
 							{authenticated
 								? authenticatedButton(this.logout)
@@ -114,11 +122,15 @@ export class App extends Component {
 							<Route path="/login">
 								<Login authInterface={this.state.auth} />
 							</Route>
+
 							<Route path="/register">
 								<Register authInterface={this.state.auth} />
 							</Route>
 							<Route path="/me">
 								<UserPage authInterface={this.state.auth} />
+							</Route>
+							<Route path="/listings">
+								<ListingsPage authInterface={this.state.auth} />
 							</Route>
 							<Route path="/">
 								<Home />
