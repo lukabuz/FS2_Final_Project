@@ -73,6 +73,7 @@ export default class Database {
 					const privateInfo = snapshot.val();
 					if (privateInfo === null) {
 						reject("User does not exist.");
+						return;
 					}
 					resolve(privateInfo.passwordHash);
 				});
@@ -90,6 +91,7 @@ export default class Database {
 					const user = snapshot.val();
 					if (user === null) {
 						reject("User does not exist.");
+						return;
 					}
 					resolve(user);
 				});
@@ -106,6 +108,7 @@ export default class Database {
 					const privateInfo = snapshot.val();
 					if (privateInfo === null) {
 						reject("User does not exist.");
+						return;
 					}
 					resolve(privateInfo.owned);
 				});
@@ -122,16 +125,27 @@ export default class Database {
 			const balance = await this.getUserBalance(from);
 			if (!fromExists) {
 				reject("Error, sender does not exist.");
-			} else if (!toExists) {
+				return;
+			}
+			if (!toExists) {
 				reject("Error, recipient does not exist.");
-			} else if (balance < amount) {
+				return;
+			}
+
+			if (balance < amount) {
 				if (from !== "ADMIN") {
 					reject("Error, not enough funds.");
+					return;
 				}
-			} else if (amount === 0) {
+			}
+			if (amount === 0) {
 				reject("Error, can't send empty transaction.");
-			} else if (from === to) {
+				return;
+			}
+
+			if (from === to) {
 				reject("Error, can't send money to yourself.");
+				return;
 			}
 
 			// generate an unique id for transaction
@@ -185,6 +199,7 @@ export default class Database {
 		return new Promise<any>(async (resolve: any, reject: any) => {
 			if (username === "ADMIN") {
 				resolve(-1);
+				return;
 			}
 
 			const userExists = await this.checkIfUserExists(username);
@@ -257,9 +272,11 @@ export default class Database {
 					})
 					.catch(e => {
 						reject(e);
+						return;
 					});
 			} else {
 				reject("User does not exist");
+				return;
 			}
 		});
 	}
@@ -316,6 +333,7 @@ export default class Database {
 					const value = snapshot.val();
 					if (value === null) {
 						reject("Listing does not exist.");
+						return;
 					}
 					value.id = snapshot.key;
 					resolve(value);
@@ -336,6 +354,7 @@ export default class Database {
 					const value = snapshot.val();
 					if (value === null) {
 						reject("Listing does not exist.");
+						return;
 					}
 					resolve(value);
 				});
@@ -351,18 +370,22 @@ export default class Database {
 			const listingObject = await this.getListing(listing);
 			if (!listingExists) {
 				reject("Listing does not exist");
+				return;
 			}
 			const userBalance = await this.getUserBalance(buyer);
 			// if both exist, check balance of user
 			if (buyer === listingObject.seller) {
 				reject("Error, can't send money to yourself.");
+				return;
 			}
 			if (userBalance < listingObject.itemPrice) {
 				reject("Not enough funds.");
+				return;
 			}
 			// check if someone is buying their own item
 			if (buyer === listingObject.seller) {
 				reject("You can not buy your own item.");
+				return;
 			}
 
 			// send money
