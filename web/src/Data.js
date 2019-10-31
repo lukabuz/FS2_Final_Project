@@ -22,7 +22,7 @@ export default class DataInterface {
 			if (json.status === "success") {
 				resolve(json);
 			} else {
-				reject(response.errors);
+				reject(json.errors);
 			}
 		});
 	};
@@ -44,6 +44,34 @@ export default class DataInterface {
 		});
 	};
 
+	sendMoney = (recipient, amount) => {
+		return new Promise(async (resolve, reject) => {
+			this.apiRequest("send", { recipient: recipient, amount: amount }, true)
+				.then(json => {
+					resolve(json);
+				})
+				.catch(e => {
+					reject(e);
+				});
+		});
+	};
+
+	depositMoney = amount => {
+		return new Promise(async (resolve, reject) => {
+			this.apiRequest(
+				"sendAsAdmin",
+				{ amount: amount, adminPassword: "adminpass" },
+				true
+			)
+				.then(json => {
+					resolve(json);
+				})
+				.catch(e => {
+					reject(e);
+				});
+		});
+	};
+
 	dictToArray = dict => {
 		let array = [];
 		for (let key in dict) {
@@ -53,9 +81,5 @@ export default class DataInterface {
 			array.push(element);
 		}
 		return array;
-	};
-
-	throwErrors = errors => {
-		return;
 	};
 }

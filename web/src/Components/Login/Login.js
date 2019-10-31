@@ -24,12 +24,14 @@ export default class Login extends Component {
 		this.props.authInterface
 			.login(this.state.username, this.state.password)
 			.then(res => {
-				alert(res);
+				alert("Logged in successfully");
+				window.location.href = "/me";
 			})
 			.catch(e => {
 				alert(e);
 			});
 	};
+
 	render() {
 		return (
 			<Column isSize="1/3" isOffset={4}>

@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import "./App.css";
 import {
 	Container,
-	Navbar,
 	NavbarBrand,
 	NavbarItem,
 	NavbarMenu,
@@ -37,12 +36,26 @@ export class App extends Component {
 		this.setState({ isActive: !this.state.isActive });
 	};
 
+	logout = () => {
+		this.state.auth.logout();
+		window.location.href = "/";
+	};
+
 	render() {
 		const authenticatedButton = logout => {
 			return (
 				<NavbarEnd>
 					<NavbarItem>
-						<Button onClick={logout} isColor="danger">
+						<NavbarItem>
+							<Link to="/me" style={{ color: "black" }}>
+								<Button isColor="info">Dashboard</Button>
+							</Link>
+						</NavbarItem>
+						<Button
+							onClick={logout}
+							isColor="danger"
+							style={{ color: "black" }}
+						>
 							Log Out
 						</Button>
 					</NavbarItem>
@@ -52,13 +65,17 @@ export class App extends Component {
 		const unAuthenticatedButton = (
 			<NavbarEnd>
 				<NavbarItem>
-					<Button isColor="">
-						<Link to="/login">Log In</Link>
+					<Button isColor="link">
+						<Link to="/login" style={{ color: "black" }}>
+							Log In
+						</Link>
 					</Button>
 				</NavbarItem>
 				<NavbarItem>
 					<Button isColor="success">
-						<Link to="/register">Register</Link>
+						<Link to="/register" style={{ color: "black" }}>
+							Register
+						</Link>
 					</Button>
 				</NavbarItem>
 			</NavbarEnd>
@@ -68,7 +85,7 @@ export class App extends Component {
 			const authenticated = this.state.auth.authenticated;
 			return (
 				<Router>
-					<Navbar style={{ border: "solid 1px #00D1B2", margin: "0" }}>
+					<nav className="navbar is-dark">
 						<NavbarBrand>
 							<NavbarItem>FSCoin</NavbarItem>
 							<NavbarItem></NavbarItem>
@@ -80,22 +97,18 @@ export class App extends Component {
 						<NavbarMenu isActive={this.state.isActive}>
 							<NavbarStart>
 								<NavbarItem>
-									<Link to="/">Home</Link>
+									<Button isColor="link">
+										<Link to="/" style={{ color: "black" }}>
+											Home
+										</Link>
+									</Button>
 								</NavbarItem>
-
-								{authenticated ? (
-									<NavbarItem>
-										<Link to="/me">My Page</Link>
-									</NavbarItem>
-								) : (
-									""
-								)}
 							</NavbarStart>
 							{authenticated
-								? authenticatedButton(this.state.auth.logout)
+								? authenticatedButton(this.logout)
 								: unAuthenticatedButton}
 						</NavbarMenu>
-					</Navbar>
+					</nav>
 					<Container isFluid style={{ marginTop: 10 }}>
 						<Switch>
 							<Route path="/login">

@@ -1,29 +1,28 @@
 import React, { Component } from "react";
 import {
 	Button,
+	Box,
 	CardFooter,
 	CardContent,
-	Subtitle,
 	Title,
-	Tag,
 	Card,
 	Tile
 } from "bloomer";
 
 const pageSize = 3;
 
-export default class Listings extends Component {
+export default class Purchases extends Component {
 	constructor(props) {
 		super(props);
-		const listings = props.listings;
-		const pages = Math.ceil(listings.length / pageSize);
-		const paginatedListings = this.paginate(listings, 1, pageSize);
+		const purchases = props.purchases;
+		const pages = Math.ceil(purchases.length / pageSize);
+		const paginatedPurchases = this.paginate(purchases, 1, pageSize);
 		this.state = {
-			listings: paginatedListings,
+			purchases: paginatedPurchases,
 			page: 1,
 			pageSize: pageSize,
 			pages: pages,
-			allListings: listings
+			allPurchases: purchases
 		};
 	}
 
@@ -39,14 +38,14 @@ export default class Listings extends Component {
 
 	newPage = page => {
 		if (page < 1 || page > this.state.pages) return;
-		const paginatedListings = this.paginate(
-			this.state.allListings,
+		const paginatedPurchases = this.paginate(
+			this.state.allPurchases,
 			page,
 			this.state.pageSize
 		);
 		this.setState({
 			...this.state,
-			listings: paginatedListings,
+			purchases: paginatedPurchases,
 			page: page
 		});
 	};
@@ -66,63 +65,46 @@ export default class Listings extends Component {
 		return date.toLocaleString();
 	};
 
-	listings = () => {
-		const listings = this.state.listings.map((val, index) => (
+	purchases = () => {
+		const purchases = this.state.purchases.map((val, index) => (
 			<div key={index}>
 				<Card>
 					<CardContent>
-						<Title>{val.itemName}</Title>
-						<Subtitle>{val.itemDescription}</Subtitle>
+						<Title>{val.listingObject.itemName}</Title>
+
+						<Box>
+							<Title>Purchase Contents:</Title>
+							{val.itemPayload}
+						</Box>
 					</CardContent>
 					<CardFooter>
-						<Tile style={{ marginTop: "10px", marginBottom: "10px" }}>
-							<Tile
-								isSize="6"
-								hasTextAlign="centered"
-								style={{
-									display: "flex",
-									alignItems: "center",
-									justifyContent: "center"
-								}}
-							>
-								<ul>
-									<li>Price: {val.itemPrice}</li>
-									<li>Date: {this.unixToDateTime(val.listingDate)}</li>
-								</ul>
-							</Tile>
-							<Tile
-								isSize="6"
-								hasTextAlign="centered"
-								style={{
-									display: "flex",
-									alignItems: "center",
-									justifyContent: "center"
-								}}
-							>
-								{val.buyer === "" ? (
-									<Tag isSize="large" isColor="info">
-										Not Purchased
-									</Tag>
-								) : (
-									<Tag isSize="large" isColor="success">
-										Purchased
-									</Tag>
-								)}
-							</Tile>
+						<Tile
+							isSize="6"
+							hasTextAlign="centered"
+							style={{
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center"
+							}}
+						>
+							<ul style={{ margin: "20px" }}>
+								<li>Price: {val.listingObject.itemPrice}</li>
+								<li>Date: {this.unixToDateTime(val.date)}</li>
+							</ul>
 						</Tile>
 					</CardFooter>
 				</Card>
 				<hr />
 			</div>
 		));
-		return listings;
+		return purchases;
 	};
 
 	render() {
 		return (
 			<div>
-				<Title>Listings</Title>
-				{this.listings()}{" "}
+				<Title>Purchases</Title>
+				{this.purchases()}{" "}
 				<Tile>
 					<Tile hasTextAlign={"left"} isSize={"4"}></Tile>
 					<Tile hasTextAlign={"center"} isSize={"4"}>
