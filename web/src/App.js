@@ -16,6 +16,7 @@ import Login from "./Components/Login/Login";
 import Register from "./Components/Register/Register";
 import UserPage from "./Components/UserPage/UserPage";
 import ListingsPage from "./Components/ListingsPage/ListingsPage";
+import Home from "./Components/Home/Home";
 
 export class App extends Component {
 	state = { isActive: false, loading: true };
@@ -157,10 +158,6 @@ export class App extends Component {
 			);
 		}
 	}
-}
-
-function Home() {
-	return <h2>Home</h2>;
 }
 
 export default App;
