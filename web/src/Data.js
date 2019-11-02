@@ -34,13 +34,28 @@ export default class DataInterface {
 				.then(json => {
 					json.sent = this.dictToArray(json.sent);
 					json.received = this.dictToArray(json.received);
-					json.received = this.dictToArray(json.received);
 					json.purchases = this.dictToArray(json.purchases);
 					json.listings = this.dictToArray(json.listings);
 					resolve(json);
 				})
 				.catch(e => {
 					reject(e);
+				});
+		});
+	};
+
+	getAllTransactions = () => {
+		return new Promise((resolve, reject) => {
+			fetch("https://fscoin-f7656.firebaseio.com/transactions.json")
+				.then(response => response.json())
+				.then(json => {
+					let ret = this.dictToArray(json);
+					console.log(ret);
+					ret.sort(this.orderTransactions);
+					resolve(ret);
+				})
+				.catch(error => {
+					reject(error);
 				});
 		});
 	};
@@ -125,6 +140,16 @@ export default class DataInterface {
 			return 1;
 		}
 		if (a.listingDate > b.listingDate) {
+			return -1;
+		}
+		return 0;
+	}
+
+	orderTransactions(a, b) {
+		if (a.date < b.date) {
+			return 1;
+		}
+		if (a.date > b.date) {
 			return -1;
 		}
 		return 0;

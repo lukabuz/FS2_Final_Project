@@ -69,7 +69,7 @@ export default class ListingsPage extends Component {
 
 	filter = opt => {
 		let filter = "Showing listings that are ";
-		if (opt === "sold" || opt == "not sold") {
+		if (opt === "sold" || opt === "not sold") {
 			filter += opt;
 		} else {
 			filter = "Showing all listings";

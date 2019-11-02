@@ -1,8 +1,32 @@
 import React, { Component } from "react";
 import { Section, Columns, Column, Title, Tile, Image } from "bloomer";
 import DataInterface from "../../Data";
+import Transactions from "../Transactions/Transactions";
 
 export default class Home extends Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			transactions: [],
+			loaded: false
+		};
+	}
+
+	componentDidMount = async () => {
+		this.dataInterface = new DataInterface(
+			this.props.authInterface.getAuthDetails().username,
+			this.props.authInterface.getAuthDetails().password
+		);
+
+		const transactions = await this.dataInterface.getAllTransactions();
+
+		this.setState(state => ({
+			...state,
+			transactions: transactions,
+			loaded: true
+		}));
+	};
+
 	render() {
 		return (
 			<div>
@@ -109,7 +133,51 @@ export default class Home extends Component {
 						</Column>
 					</Columns>
 				</Section>
-				<Section>Test</Section>
+				<Section>
+					<Columns>
+						<Column
+							style={{
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center"
+							}}
+						>
+							<Title>Recent Transactions</Title>
+						</Column>
+					</Columns>
+					<br />
+					<Columns
+						style={{
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							width: "auto"
+						}}
+					>
+						<Column
+							style={{
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center"
+							}}
+							isSize="1"
+						>
+							{this.state.loaded ? (
+								<Transactions
+									style={{
+										display: "flex",
+										alignItems: "center",
+										justifyContent: "center",
+										margin: "auto"
+									}}
+									transactions={this.state.transactions}
+								/>
+							) : (
+								""
+							)}
+						</Column>
+					</Columns>
+				</Section>
 			</div>
 		);
 	}

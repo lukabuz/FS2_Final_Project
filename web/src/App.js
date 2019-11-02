@@ -134,7 +134,7 @@ export class App extends Component {
 								<ListingsPage authInterface={this.state.auth} />
 							</Route>
 							<Route path="/">
-								<Home />
+								<Home authInterface={this.state.auth} />
 							</Route>
 						</Switch>
 					</Container>
