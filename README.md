@@ -41,3 +41,18 @@ Typescript.
 	- Transactions - The transactions list component of UserPage
 - Login - The login page
 - Register - The register page
+
+# How To Run
+
+To run the react app, you must
+
+    $ cd web
+	$ npm start
+
+To deploy functions, you must initialize a firebase project
+
+	$ firebase init
+	$ firebase deploy --only functions
+	$ firebase deploy --only hosting
+
+The react app is already deployed at https://fscoin-f7656.firebaseapp.com/
